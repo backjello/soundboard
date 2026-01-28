@@ -1,0 +1,55 @@
+<div class="upload-container">
+  <div class="upload-header">
+    <h3>📤 Upload Audio File</h3>
+    <button class="close-btn" (click)="cancel()" title="Close">✕</button>
+  </div>
+
+  <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()" class="upload-form">
+    <div class="form-group">
+      <label for="name">Audio Name</label>
+      <input type="text" id="name" formControlName="name" class="form-control"
+        [class.error]="uploadForm.get('name')?.invalid && uploadForm.get('name')?.touched"
+        placeholder="Enter a name for your audio">
+      <div class="error-message" *ngIf="uploadForm.get('name')?.invalid && uploadForm.get('name')?.touched">
+        <span *ngIf="uploadForm.get('name')?.errors?.['required']">Name is required</span>
+        <span *ngIf="uploadForm.get('name')?.errors?.['minlength']">Name must be at least 2 characters</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="file">Audio File</label>
+      <div class="file-input-container">
+        <input type="file" id="file" (change)="onFileSelected($event)" accept="audio/*" class="file-input">
+        <label for="file" class="file-input-label">
+          <span *ngIf="!selectedFile" class="file-placeholder">
+            📁 Choose audio file (MP3, WAV, OGG, M4A, FLAC, AAC)
+          </span>
+          <span *ngIf="selectedFile" class="file-selected">
+            🎵 {{ selectedFile.name }}
+          </span>
+        </label>
+      </div>
+      <div class="file-info">
+        <small>Maximum file size: 2MB</small>
+      </div>
+    </div>
+
+    <div class="success-message" *ngIf="successMessage">
+      ✅ {{ successMessage }}
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isLoading">
+        Cancel
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="uploadForm.invalid || !selectedFile || isLoading">
+        <span *ngIf="isLoading" class="loading-spinner">⏳</span>
+        {{ isLoading ? 'Uploading...' : 'Upload' }}
+      </button>
+    </div>
+  </form>
+</div>

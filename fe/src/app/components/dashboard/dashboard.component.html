@@ -1,0 +1,103 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <h1>🎵 Soundboard Dashboard</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="openUploadModal()">
+        📤 Upload Audio
+      </button>
+      <button class="btn btn-secondary" (click)="logout()">
+        🚪 Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Search and Filter Controls -->
+  <div class="search-controls">
+    <div class="search-bar">
+      <input type="text" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="🔍 Search audio files..."
+        class="search-input" />
+      <button *ngIf="searchQuery" class="btn btn-sm btn-secondary clear-search" (click)="clearSearch()"
+        title="Clear search">
+        ✗
+      </button>
+    </div>
+    <div class="filter-controls">
+      <button class="btn filter-btn" [class.active]="showFavoritesOnly" (click)="onFavoritesToggle()"
+        title="Show favorites only">
+        <span *ngIf="!showFavoritesOnly">⭐ Show Favorites</span>
+        <span *ngIf="showFavoritesOnly">📋 Show All</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="dashboard-content">
+    <div *ngIf="isLoading" class="loading">
+      <p>⏳ Loading audio files...</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="!isLoading && audioList.length === 0" class="empty-state">
+      <h3>🎧 No audio files yet</h3>
+      <p>Upload your first audio file to get started!</p>
+      <button class="btn btn-primary" (click)="openUploadModal()">
+        📤 Upload Audio
+      </button>
+    </div>
+
+    <div *ngIf="!isLoading && audioList.length > 0" class="audio-grid">
+      <div *ngFor="let audio of audioList" class="audio-card">
+        <div class="audio-info">
+          <div *ngIf="editingAudio?.id !== audio.id">
+            <h3 class="audio-name">{{ audio.name }}</h3>
+          </div>
+          <div *ngIf="editingAudio?.id === audio.id" class="audio-rename">
+            <input type="text" [(ngModel)]="newName" class="rename-input" (keyup.enter)="confirmRename()"
+              (keyup.escape)="cancelRename()" placeholder="Enter new name" />
+            <div class="rename-actions">
+              <button class="btn btn-sm btn-success" (click)="confirmRename()" title="Confirm rename">
+                ✓
+              </button>
+              <button class="btn btn-sm btn-secondary" (click)="cancelRename()" title="Cancel rename">
+                ✗
+              </button>
+            </div>
+          </div>
+          <p class="audio-meta">
+            Uploaded by: {{ audio.uploadedBy?.fullName || audio.uploadedBy?.email }}
+          </p>
+          <p class="audio-date">
+            {{ audio.createdAt | date:'short' }}
+          </p>
+        </div>
+
+        <div class="audio-actions">
+          <button class="btn btn-play" (click)="playAudio(audio)" title="Play audio">
+            ▶️ Play
+          </button>
+          <button class="btn btn-favorite" [class.favorited]="audio.isFavorited" (click)="toggleFavorite(audio)"
+            [title]="audio.isFavorited ? 'Remove from favorites' : 'Add to favorites'">
+            <span *ngIf="!audio.isFavorited">⭐ Favorite</span>
+            <span *ngIf="audio.isFavorited">❤️ Favorited</span>
+          </button>
+          <button *ngIf="canEditAudio(audio) && editingAudio?.id !== audio.id" class="btn btn-edit"
+            (click)="startRename(audio)" title="Rename audio">
+            ✏️ Rename
+          </button>
+          <button *ngIf="canEditAudio(audio)" class="btn btn-danger" (click)="deleteAudio(audio)" title="Delete audio">
+            🗑️ Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Modal -->
+  <div *ngIf="showUploadModal" class="modal-overlay" (click)="closeUploadModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <app-audio-upload (uploadComplete)="closeUploadModal()"></app-audio-upload>
+    </div>
+  </div>
+</div>
